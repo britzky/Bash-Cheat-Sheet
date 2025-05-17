@@ -587,6 +587,100 @@ exit 1   # Exit the script unsuccessfully
 echo $?  # Print the last exit code
 ```
 
+### Mathematical Operators
+
+#### Arithmetic Operators
+- `+` - Addition
+- `-` - Subtraction
+- `*` - Multiplication (needs escaping as `\*` in some contexts)
+- `/` - Division (integer division in arithmetic context)
+- `%` - Modulus (remainder)
+- `**` - Exponentiation
+
+#### Assignment Operators
+- `=` - Basic assignment
+- `+=` - Add and assign
+- `-=` - Subtract and assign
+- `*=` - Multiply and assign
+- `/=` - Divide and assign
+- `%=` - Modulus and assign
+
+#### Increment/Decrement Operators
+- `++` - Increment (can be pre or post: `++i` or `i++`)
+- `--` - Decrement (can be pre or post: `--i` or `i--`)
+
+#### Let Command
+
+The `let` command performs arithmetic operations and assigns values to variables.
+- Performs integer arithmetic only (no floating point)
+- Variables don't need $ prefix inside the expression
+- Returns exit status 0 if the expression is non-zero, 1 otherwise
+- Useful in scripts for counters and arithmetic comparisons
+
+```bash
+let x=5+4                   # Assign result of 5+4 to x (x=9)
+let "x = 5 + 4"             # Quotes allow spaces in the expression
+let x+=1                    # Increment x by 1 (equivalent to x=x+1)
+let x-=2                    # Decrement x by 2 (equivalent to x=x-2)
+let x*=3                    # Multiply x by 3 (equivalent to x=x*3)
+let x/=4                    # Divide x by 4 (equivalent to x=x/4)
+let x%=5                    # Set x to remainder of x/5 (equivalent to x=x%5)
+let "x = y * 2"             # Use another variable in calculation
+let "x = 1 << 2"            # Bitwise operations are supported (x=4)
+```
+
+#### Expr Command
+
+The `expr` command evaluates expressions and outputs the result to standard output.
+- Older and more portable than arithmetic expansion
+- Requires spaces between operators and operands
+- Some operators like *, >, < must be escaped
+- Returns the result via stdout (requires command substitution to capture)
+- Returns exit status based on the expression value (0 if non-zero/non-empty)
+- Can also manipulate strings in addition to numbers
+
+```bash
+expr 5 + 4                  # Outputs: 9
+expr 10 - 2                 # Outputs: 8
+expr 20 \* 3                # Outputs: 60 (note the escaped multiplication symbol)
+expr 20 / 4                 # Outputs: 5 (integer division only)
+expr 20 % 3                 # Outputs: 2 (remainder)
+
+x=$(expr 5 + 4)             # Assign result to variable x
+y=$(expr $x + 2)            # Use variables in expressions (spaces required)
+expr $x \> $y               # Comparison (outputs 0 for false, 1 for true)
+expr length "string"        # Outputs: 6 (string length)
+expr substr "string" 2 3    # Outputs: tri (substring from position 2, length 3)
+expr index "string" "r"     # Outputs: 3 (position of character)
+```
+
+#### BC Command
+
+The `bc` command is an arbitrary precision calculator language that handles floating-point operations.
+- Handles floating-point arithmetic (unlike bash's built-in arithmetic)
+- Use scale=n to set decimal precision
+- The -l flag loads the math library for advanced functions
+- Can handle arbitrary precision for very large numbers
+- Interactive mode available by running bc without piping
+- Can read from files with mathematical expressions
+- Essential for scripts requiring precise calculations
+
+```bash
+echo "5 + 3.5" | bc         # Outputs: 8.5
+echo "scale=3; 10/3" | bc   # Outputs: 3.333 (sets decimal precision)
+echo "sqrt(16)" | bc        # Outputs: 4 (square root function)
+echo "3^4" | bc             # Outputs: 81 (exponentiation)
+
+result=$(echo "scale=2; 5.7 * 2.2" | bc)    # Capture result in variable
+echo $result                # Outputs: 12.54
+
+bc -l <<< "s(1)"            # Outputs: .84147098 (sine of 1 radian with math library)
+bc -l <<< "c(0)"            # Outputs: 1.00000000 (cosine with math library)
+bc -l <<< "a(1)"            # Outputs: .78539816 (arctangent with math library)
+bc -l <<< "e(1)"            # Outputs: 2.71828183 (exponential function with math library)
+bc -l <<< "l(10)"           # Outputs: 2.30258509 (natural logarithm with math library)
+```
+
 ### Conditional Statements
 
 #### Boolean Operators
@@ -613,6 +707,7 @@ echo $?  # Print the last exit code
 - `-n` - Is not null
 - `<` - Is less than in ASCII alphabetical order
 - `>` - Is greater than in ASCII alphabetical order
+
 
 #### If Statements
 
