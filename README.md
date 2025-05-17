@@ -609,6 +609,46 @@ echo $?  # Print the last exit code
 - `++` - Increment (can be pre or post: `++i` or `i++`)
 - `--` - Decrement (can be pre or post: `--i` or `i--`)
 
+## `$`/`${}` is unnecessary on arithmetic variables.
+
+### Problematic code:
+
+```bash
+echo $(($n + ${arr[i]}))
+```
+
+### Correct code:
+
+```bash
+echo $((n + arr[i]))
+```
+
+### Rationale:
+
+The `$` or `${..}` on regular variables in arithmetic contexts is unnecessary, and can even lead to subtle bugs. This is because the contents of `$((..))` is first expanded into a string, and then evaluated as an expression:
+
+```bash
+$ a='1+1'
+$ echo $(($a * 5))    # becomes 1+1*5
+6
+$ echo $((a * 5))     # evaluates as (1+1)*5
+10
+```
+
+The `$` is unavoidable for special variables like `$1` vs `1`, `$#` vs `#`. It's also required when adding modifiers to parameters expansions, like `${#var}` or `${var%-}`. ShellCheck does not warn about these cases.
+
+The `$` is also required (and not warned about) when you need to specify the *base* for a variable value:
+
+```bash
+$ a=09
+$ echo $((a + 1))          # leading zero forces octal interpretation
+bash: 09: value too great for base (error token is "09")
+$ echo $((10#a + 1))
+bash: 10#a: value too great for base (error token is "10#a")
+$ echo $((10#$a + 1))
+10
+```
+
 #### Let Command
 
 The `let` command performs arithmetic operations and assigns values to variables.
